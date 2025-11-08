@@ -1,0 +1,10 @@
+# Add project dependencies below, one per line
+# Database access
+SQLAlchemy==2.0.44
+pyodbc==4.0.35
+
+# YAML for pipeline configuration
+PyYAML==6.0
+
+# Optional - for .env support during local development (not required)
+dotenv==0.9.9

@@ -1,0 +1,10 @@
+roblox_pipeline:
+  enabled: true          # Whether to build this pipeline
+  type: sample             # Options: "full" or "sample"
+  sample_size: 100       # Only used if type = "sample"
+  output_csv: "roblox_data.csv"
+
+#roblox_pipeline:
+#  enabled: true          # Whether to build this pipeline
+#  type: full             # Options: "full" or "sample"
+#  output_csv: "roblox_data.csv"
