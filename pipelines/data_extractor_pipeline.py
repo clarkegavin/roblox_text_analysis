@@ -1,4 +1,4 @@
-# pipelines/table_pipeline.py
+# pipelines/data_extractor_pipeline.py
 from typing import Optional
 import os
 import pandas as pd
@@ -7,7 +7,7 @@ from logs.logger import get_logger
 from pipelines.base import Pipeline
 
 
-class TablePipeline(Pipeline):
+class DataExtractorPipeline(Pipeline):
     """
     ETL pipeline for a single table extractor.
     Inherits from the base Pipeline class.
@@ -16,7 +16,7 @@ class TablePipeline(Pipeline):
     def __init__(self, extractor: DataExtractor, output_csv: Optional[str] = None):
         self.extractor = extractor
         self.logger = get_logger(self.__class__.__name__)
-        self.df = None
+        self.df: Optional[pd.DataFrame] = None
         self.output_csv = output_csv or os.getenv("OUTPUT_CSV", "output.csv")
 
     def extract(self) -> None:
@@ -33,21 +33,22 @@ class TablePipeline(Pipeline):
         for col in ("Date", "Date_Created", "Last_Updated"):
             if col in self.df.columns:
                 self.df[col] = pd.to_datetime(self.df[col], errors="coerce")
-
         self.logger.info("Transformation complete")
 
     def load(self) -> None:
         """Save transformed data to CSV."""
-        self.logger.info(f"Saving data to {self.output_csv}")
-        self.df.to_csv(self.output_csv, index=False)
-        self.logger.info("Data saved successfully")
+        if self.df is not None:
+            self.logger.info(f"Saving data to {self.output_csv}")
+            self.df.to_csv(self.output_csv, index=False)
+            self.logger.info("Data saved successfully")
 
-    def execute(self) -> None:
+    def execute(self, data: Optional[pd.DataFrame] = None) -> pd.DataFrame:
         """
-        Execute the full ETL process.
-        This method implements the abstract `execute()` from the base class.
+        Execute the full ETL process and return the resulting DataFrame.
+        `data` parameter is ignored here, since extraction starts from scratch.
         """
         self.extract()
         self.transform()
         self.load()
         self.logger.info("Pipeline execution complete")
+        return self.df
