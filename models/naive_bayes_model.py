@@ -1,5 +1,5 @@
 from .base import Model
-from sklearn.naive_bayes import GaussianNB#
+from sklearn.naive_bayes import GaussianNB, MultinomialNB, BernoulliNB
 from typing import Dict, Any
 from logs.logger import get_logger
 
@@ -16,7 +16,7 @@ class NaiveBayesClassificationModel(Model):
         self.params = params
 
     def build(self):
-        self.model = GaussianNB(**self.params)
+        self.model = MultinomialNB(**self.params)
         self.logger.info(f"Built Naive Bayes model with params: {self.params}")
         return self
 

@@ -20,6 +20,7 @@ class ClassificationExperiment(Experiment):
         evaluator_params: Optional[Dict] = None,
         mlflow_tracking: bool = True,
         mlflow_experiment: Optional[str] = None,
+        vectorizer: Optional[Dict] = None,
     ):
 
         super().__init__(name, mlflow_tracking, mlflow_experiment)
@@ -38,9 +39,40 @@ class ClassificationExperiment(Experiment):
         self.logger.info(f'Evaluator params: {self.evaluator_params}')
         self.evaluator = EvaluatorFactory.get_evaluator(name=evaluator_name,  **self.evaluator_params)
         self.results = {}
+        self.vectorizer = vectorizer or {}
+        self.vectorizer_name = self.vectorizer.get("vectorizer_name")
+        self.vectorizer_field = self.vectorizer.get("vectorizer_field")
+        self.vectorizer_params = self.vectorizer.get("vectorizer_params", {})
 
     def run(self, X_train, X_test, y_train, y_test):
         self.logger.info(f"Running classification experiment '{self.name}'")
+
+        # --- 1. Vectorizer support -----------------------
+        vectorizer_name = getattr(self, "vectorizer_name", None)
+        vectorizer_field = getattr(self, "vectorizer_field", None)
+        vectorizer_params = getattr(self, "vectorizer_params", {})
+        vectorizer_params['column'] = vectorizer_field
+
+        if vectorizer_name:
+            from vectorizers.factory import VectorizerFactory
+
+            self.logger.info(f"Using vectorizer '{vectorizer_name}' on field '{vectorizer_field}'")
+            vectorizer = VectorizerFactory.get_vectorizer(
+                vectorizer_name,
+                **vectorizer_params
+            )
+
+            # Fit on training set
+            #X_train_vec = vectorizer.fit_transform(X_train[vectorizer_field])
+            X_train_vec = vectorizer.fit_transform(X_train.fillna(""))
+
+            # Transform on test set
+            #X_test_vec = vectorizer.transform(X_test[vectorizer_field])
+            X_test_vec = vectorizer.transform(X_test.fillna(""))
+
+            # Replace input matrices
+            X_train = X_train_vec
+            X_test = X_test_vec
 
         with mlflow.start_run(run_name=self.name):
             mlflow.log_param("model", self.model_name)
