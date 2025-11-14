@@ -27,7 +27,8 @@ class TargetFeaturePipeline(Pipeline):
         if not self.fitted:
             raise RuntimeError("Target encoder not fitted yet. Call fit() first.")
         self.logger.info(f"Transforming target column '{self.target_column}'")
-        return pd.Series(self.encoder.transform(y), index=y.index, name=y.name)
+        data =  pd.Series(self.encoder.transform(y), index=y.index, name=y.name)
+        return data
 
     def fit_transform(self, y: pd.Series) -> pd.Series:
         """Fit the target encoder on y and return transformed y."""

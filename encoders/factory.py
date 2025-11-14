@@ -12,10 +12,11 @@ class EncoderFactory:
     New encoders can be registered without changing client code.
     """
 
-    _registry: Dict[str, Type[Encoder]] = {
-        "label": SklearnLabelEncoder,
-        "sklearn_label": SklearnLabelEncoder,
-    }
+    # _registry: Dict[str, Type[Encoder]] = {
+    #     "label": SklearnLabelEncoder,
+    #     "sklearn_label": SklearnLabelEncoder,
+    # }
+    _registry = {}
 
     @classmethod
     def register(cls, name: str, encoder_cls: Type[Encoder]) -> None:
