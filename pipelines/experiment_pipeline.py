@@ -33,10 +33,10 @@ class ExperimentPipeline(Pipeline):
         params = entry.get("params", {})
         return cls(**params, name=entry.get("name"))
 
-    def execute(self, X_train, X_test, y_train, y_test):
+    def execute(self, X_train, X_test, y_train, y_test, target_encoder=None):
         self.logger.info(f"Running experiments for model '{self.model_name}'")
         mlflow_experiment_name = self.mlflow_experiment or f"{self.model_name}_experiments"
-
+        self.logger.info(f"Target encoder provided: {target_encoder is not None}")
         for i, exp_cfg in enumerate(self.experiments, start=1):
             run_name = exp_cfg.get("run_name", f"{self.model_name}_run{i}")
             self.logger.info(f"Starting experiment {i} ({run_name}) with params {exp_cfg.get('params', {})}")
@@ -47,6 +47,7 @@ class ExperimentPipeline(Pipeline):
                 "evaluator_name": self.evaluator_name,
                 "metrics": self.metrics,
                 "mlflow_experiment": mlflow_experiment_name,
+                "target_encoder": target_encoder,
                 **exp_cfg.get("params", {})
             }
 
