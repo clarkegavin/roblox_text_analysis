@@ -58,7 +58,6 @@ pipelines:
       evaluator_name: "classification"
       metrics: ["accuracy", "f1_score", "precision", "recall"]
       mlflow_experiment: "Naive Bayes Experiments"
-
       experiments:
         # ------------------------------------------------------------
         # 1. Naive Bayes + TF-IDF
@@ -66,6 +65,7 @@ pipelines:
         - run_name: "Naive Bayes TF-IDF"
           params:
             description: "Naive Bayes experiments with TF-IDF vectorization technique on Roblox game descriptions."
+            save_path: "output/naive_bayes_results"
             cv_enabled: true
             cv_stratified: true
             cv_folds: 5
@@ -78,6 +78,11 @@ pipelines:
                 max_features: 5000
                 ngram_range: [1, 2]
                 stop_words: "english"
+            visualisations:
+              - name: confusion_matrix
+                kwargs:
+                  figsize: [ 8, 6 ]
+                  cmap: "Blues"
 
 #        # ------------------------------------------------------------
 #        # 2. Naive Bayes + Word2Vec

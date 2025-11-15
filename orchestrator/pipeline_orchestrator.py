@@ -36,11 +36,10 @@ class PipelineOrchestrator:
                     )
                 elif isinstance(pipeline, ExperimentPipeline):
                     self.logger.info("Executing ExperimentPipeline with train/test data")
+                    # check if target_encoder is in extra
+                    self.logger.info(f"Target encoder being passed in extra: {'target_encoder' in extra}")
                     result = pipeline.execute(
-                        X_train=extra["X_train"],
-                        X_test=extra["X_test"],
-                        y_train=extra["y_train"],
-                        y_test=extra["y_test"]
+                        **extra
                     )
                 else:
                     result = pipeline.execute(data)
@@ -57,9 +56,12 @@ class PipelineOrchestrator:
 
     def run(self, data: Optional[pd.DataFrame] = None, target_column: str = None):
         """Run all pipelines sequentially."""
+
         self.logger.info("Starting orchestrator run")
         X_train = X_test = y_train = y_test = None
         current_data = data
+        if target_encoder := None:
+            self.logger.info("No target encoder at start of orchestration")
 
         for pipeline in self.pipelines:
             if isinstance(pipeline, DataSplitterPipeline):
@@ -73,16 +75,21 @@ class PipelineOrchestrator:
                 y_test_encoded = self.run_pipeline(pipeline, extra={"y": y_test, "fit": False})
                 # Replace y_train/y_test for downstream pipelines if needed
                 y_train, y_test = y_train_encoded, y_test_encoded
+                # store the encoder
+                target_encoder = pipeline.encoder
+
             elif isinstance(pipeline, FeatureEncoderPipeline):
                 X_train = self.run_pipeline(pipeline, data=X_train, extra={"fit": True})
                 X_test = self.run_pipeline(pipeline, data=X_test, extra={"fit": False})
             elif isinstance(pipeline, ExperimentPipeline):
                 # Pass train/test data explicitly
+                self.logger.info(f"Target encoder being passed to ExperimentPipeline: {target_encoder is not None}")
                 self.run_pipeline(pipeline, extra={
                     "X_train": X_train,
                     "X_test": X_test,
                     "y_train": y_train,
-                    "y_test": y_test
+                    "y_test": y_test,
+                    "target_encoder": target_encoder
                 })
             else:
                 # Other pipelines that operate on the full dataset

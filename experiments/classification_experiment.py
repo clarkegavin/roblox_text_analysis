@@ -6,11 +6,12 @@ from logs.logger import get_logger
 import mlflow
 import json, os
 from datetime import datetime
-from typing import Optional, Dict, List
+from typing import Optional, Dict, List, Any
 from sklearn.model_selection import KFold, StratifiedKFold
 import numpy as np
 from vectorizers.factory import VectorizerFactory
 from mlflow.models import infer_signature
+from visualisations.factory import VisualisationFactory
 
 class ClassificationExperiment(Experiment):
     def __init__(
@@ -31,6 +32,8 @@ class ClassificationExperiment(Experiment):
         description: Optional[str] = None,
         cv_shuffle: Optional[bool] = True,
         cv_random_state: Optional[int] = 42,
+        visualisations: Optional[List[Dict]] = None,
+        target_encoder: Optional[Any] = None,
     ):
 
         super().__init__(name, mlflow_tracking, mlflow_experiment)
@@ -39,6 +42,7 @@ class ClassificationExperiment(Experiment):
         self.description  = description
         self.metrics = metrics
         self.save_path = save_path
+        self.logger.info(f'Save path for results: {self.save_path}')
         self.model_params = model_params or {}
         self.evaluator_params = evaluator_params or {}
         # Initialize logger
@@ -58,12 +62,19 @@ class ClassificationExperiment(Experiment):
         self.cv_stratified = cv_stratified
         self.cv_shuffle = cv_shuffle
         self.cv_random_state = cv_random_state
+        # Target encoder
+        self.target_encoder = target_encoder
+        self.logger.info(f'Target encoder provided: {self.target_encoder is not None}')
+
 
         # Vectorizer support
         self.vectorizer = vectorizer or {}
         self.vectorizer_name = self.vectorizer.get("vectorizer_name")
         self.vectorizer_field = self.vectorizer.get("vectorizer_field")
         self.vectorizer_params = self.vectorizer.get("vectorizer_params", {})
+        # Visualisations
+        self.visualisations = visualisations or []
+        self.logger.info(f'Visualisations configured: {self.visualisations}')
 
         self.results = {}
 
@@ -135,6 +146,11 @@ class ClassificationExperiment(Experiment):
         for k, v in test_metrics.items():
             mlflow.log_metric(f"test_{k}", v)
         self.logger.info(f"Test set metrics: {test_metrics}")
+
+        # Generate and log visualisations
+        self.logger.info("Generating test set visualisations")
+        self._generate_visualisations(y_test, y_pred)
+
         return test_metrics
 
 
@@ -175,6 +191,9 @@ class ClassificationExperiment(Experiment):
                 mlflow.log_metric(f"fold_{fold_index}_{m}", current_res[m])
 
             fold_index += 1
+            # Generate and log visualisations
+            self.logger.info(f"Generating visualisations for fold {fold_index - 1}")
+            self._generate_visualisations(y_val_fold, y_pred)
 
         # Compute average CV metrics
         averaged_metrics = {m: float(sum(vals) / len(vals)) for m, vals in fold_metrics.items()}
@@ -209,3 +228,37 @@ class ClassificationExperiment(Experiment):
             )
         self.logger.info(f"Saved results locally to {file_path}")
 
+    def _generate_visualisations(self, y_true, y_pred):
+
+        if not self.visualisations:
+            self.logger.info("No visualisations configured, skipping.")
+            return
+
+        self.logger.info("Generating visualisations")
+        self.logger.info(f'Target encoder available: {self.target_encoder is not None}')
+        for viz_cfg in self.visualisations:
+            viz_name = viz_cfg.get("name")
+            viz_kwargs = viz_cfg.get("kwargs", {})
+            viz_kwargs.update({
+                "y_true": y_true,
+                "y_pred": y_pred,
+                "target_encoder": self.target_encoder
+            })
+            try:
+                viz = VisualisationFactory.get_visualisation(viz_name, **viz_kwargs)
+                if viz:
+                    self.logger.info(f"Creating visualisation: {viz_name}")
+                    fig = viz.plot(None)  # 'data' param not needed here
+                    # Save locally
+                    if self.save_path:
+                        os.makedirs(self.save_path, exist_ok=True)
+                        filepath = os.path.join(self.save_path, f"{self.name}_{viz_name}.png")
+                        viz.save(fig, filepath)
+                        self.logger.info(f"Saved visualisation '{viz_name}' to {filepath}")
+                    # Log to MLflow
+                        try:
+                            mlflow.log_artifact(filepath)
+                        except Exception as e:
+                            self.logger.warning(f"Could not log visualisation '{viz_name}' to MLflow: {e}")
+            except Exception as e:
+                self.logger.warning(f"Could not create visualisation '{viz_name}': {e}")
