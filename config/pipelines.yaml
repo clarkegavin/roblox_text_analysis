@@ -254,3 +254,95 @@ pipelines:
                 kwargs:
                   figsize: [8, 6]
                   cmap: "Blues"
+  - name: svm
+    type: pipelines.experiment_pipeline.ExperimentPipeline
+    params:
+      experiment_type: "classification"
+      model_name: "svm"
+      evaluator_name: "classification"
+      metrics: [ "accuracy", "f1_score", "precision", "recall" ]
+      mlflow_experiment: "SVM Experiments"
+      experiments:
+        # ------------------------------------------------------------
+        # 1. SVM + TF-IDF
+        # ------------------------------------------------------------
+        - run_name: "SVM TF-IDF"
+          params:
+            description: "SVM experiments with TF-IDF vectorization technique on Roblox game descriptions."
+            save_path: "output/svm_results"
+            cv_enabled: true
+            cv_stratified: true
+            cv_folds: 5
+            cv_shuffle: true
+            cv_random_state: 42
+            model_params:
+              kernel: "linear"  # LinearSVC default
+              C: 1.0
+            vectorizer:
+              vectorizer_name: "tfidf"
+              vectorizer_field: "Description"
+              vectorizer_params:
+                max_features: 5000
+                ngram_range: [1, 2]
+                stop_words: "english"
+            visualisations:
+              - name: confusion_matrix
+                kwargs:
+                  figsize: [8, 6]
+                  cmap: "Blues"
+
+        # ------------------------------------------------------------
+        # 2. SVM + Word2Vec
+        # ------------------------------------------------------------
+        - run_name: "SVM Word2Vec"
+          params:
+            description: "SVM experiments with Word2Vec embeddings on Roblox game descriptions."
+            save_path: "output/svm_results"
+            cv_enabled: true
+            cv_stratified: true
+            cv_folds: 5
+            cv_shuffle: true
+            cv_random_state: 42
+            model_params:
+              kernel: "linear"
+              C: 1.0
+              # scale_features: true  # optional flag if your pipeline scales dense vectors
+            vectorizer:
+              vectorizer_name: "word2vec"
+              vectorizer_field: "Description"
+              vectorizer_params:
+                vector_size: 300
+                window: 5
+                min_count: 2
+            visualisations:
+              - name: confusion_matrix
+                kwargs:
+                  figsize: [8, 6]
+                  cmap: "Blues"
+
+        # ------------------------------------------------------------
+        # 3. SVM + BERT
+        # ------------------------------------------------------------
+        - run_name: "SVM BERT"
+          params:
+            description: "SVM experiments with BERT embeddings on Roblox game descriptions."
+            save_path: "output/svm_results"
+            cv_enabled: true
+            cv_stratified: true
+            cv_folds: 5
+            cv_shuffle: true
+            cv_random_state: 42
+            model_params:
+              kernel: "linear"
+              C: 1.0
+              # scale_features: true
+            vectorizer:
+              vectorizer_name: "bert"
+              vectorizer_field: "Description"
+              vectorizer_params:
+                model_name: "sentence-transformers/all-mpnet-base-v2"
+            visualisations:
+              - name: confusion_matrix
+                kwargs:
+                  figsize: [8, 6]
+                  cmap: "Blues"
