@@ -22,4 +22,4 @@ class VisualisationFactory:
             return None
 
         cls.logger.info(f"Instantiating visualisation '{name}'")
-        return viz_cls(title=name, **kwargs)
+        return viz_cls(**kwargs)
