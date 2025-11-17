@@ -6,6 +6,7 @@
 #    sample_size: 100
 #    output_csv: "roblox_data.csv"
 
+
 pipelines:
   - name: roblox_extraction
     type: pipelines.data_extractor_pipeline.DataExtractorPipeline
@@ -25,6 +26,17 @@ pipelines:
               'Date_Created', 'Last_Updated', 'Server_Size', 'Title',
               'Creator', 'gameID', 'Category', 'URL' ]
 
+  - name: eda
+    type: pipelines.eda_pipeline.EDAPipeline
+    params:
+      save_path: "output/eda"
+      steps:
+        - name: class_balance
+        - name: wordcloud_global
+        - name: wordcloud_by_class
+    #dataset:
+      target: "Genre"
+      text_field: "Description"
 
   - name: split_data
     type: pipelines.data_splitter_pipeline.DataSplitterPipeline
@@ -37,6 +49,7 @@ pipelines:
     type: pipelines.target_feature_pipeline.TargetFeaturePipeline
     params:
       target_column: "Genre"
+
 
 
 #  - name: naive_bayes

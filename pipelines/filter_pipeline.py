@@ -2,10 +2,11 @@
 from filters.factory import FilterFactory
 import pandas as pd
 from logs.logger import get_logger
+from pipelines.base import Pipeline
 
 
 
-class FilterPipeline:
+class FilterPipeline(Pipeline):
     logger = get_logger("FilterPipeline")
 
     def __init__(self, filter_configs: list[dict]):

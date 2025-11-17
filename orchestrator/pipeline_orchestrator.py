@@ -42,6 +42,7 @@ class PipelineOrchestrator:
                         **extra
                     )
                 else:
+                    self.logger.info(f"Executing general pipeline: {pipeline.__class__.__name__} with data shape: {data.shape if data is not None else 'N/A'}")
                     result = pipeline.execute(data)
                     self.logger.info(f"Pipeline {pipeline.__class__.__name__} output shape: {result.shape if isinstance(result, pd.DataFrame) else 'N/A'}")
 
@@ -94,8 +95,13 @@ class PipelineOrchestrator:
             else:
                 # Other pipelines that operate on the full dataset
                 self.logger.info(f"Running general pipeline: {pipeline.__class__.__name__}")
+                if current_data is None:
+                    self.logger.error(f"No data available for pipeline {pipeline.__class__.__name__}")
+                else:
+                    self.logger.info(f"Current data shape before {pipeline.__class__.__name__}: {current_data.shape}")
+
                 current_data = self.run_pipeline(pipeline, data=current_data)
-                self.logger.info(f"Data shape after {pipeline.__class__.__name__}: {current_data.shape}")
+                #self.logger.info(f"Data shape after {pipeline.__class__.__name__}: {current_data.shape}")
 
         self.logger.info("Pipeline orchestration complete")
         return X_train, X_test, y_train, y_test
