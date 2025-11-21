@@ -44,6 +44,7 @@ class ClassBalanceEDA(EDAComponent):
             "bar_chart",
             title="Class Balance",
             xlabel=target,
+            xticks_rotation = 45,
             ylabel="Count",
             figsize=(10, 6)
         )

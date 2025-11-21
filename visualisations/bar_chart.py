@@ -43,5 +43,10 @@ class BarChart(Visualisation):
             ax.set_xlabel(self.xlabel)
         if self.ylabel:
             ax.set_ylabel(self.ylabel)
+
+        rotation = self.params.get("xticks_rotation")
+        if rotation is not None:
+            ax.tick_params(axis='x', labelrotation=rotation)
+
         self.logger.info("Bar Chart visualisation created")
         return fig, ax
