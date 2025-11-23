@@ -8,6 +8,7 @@ from .experiment_pipeline import ExperimentPipeline
 from .filter_pipeline import FilterPipeline
 from .eda_pipeline import EDAPipeline
 from .preprocessing_pipeline import PreprocessingPipeline
+from .data_cleanup_pipeline import DataCleanupPipeline
 
 
 __all__ = [
@@ -20,4 +21,5 @@ __all__ = [
     "FilterPipeline",
     "EDAPipeline",
     "PreprocessingPipeline",
+    "DataCleanupPipeline",
 ]

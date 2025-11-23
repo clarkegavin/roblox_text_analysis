@@ -43,7 +43,7 @@ class PreprocessingPipeline(Pipeline):
         safe_texts = " | ".join(
             t.encode("ascii", errors="ignore").decode() for t in texts[:20]
         )
-        self.logger.info("Sample processed texts: %s", safe_texts)
+        #self.logger.info("Sample processed texts: %s", safe_texts)
         X[self.text_field] = texts
         return X
 

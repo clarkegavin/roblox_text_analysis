@@ -13,8 +13,27 @@ pipelines:
     extractor_type: roblox
     params:
       output_csv: "output/roblox_data.csv"
-      extractor_params:
-        sample_size: 1000
+#      extractor_params:
+#        sample_size: 1000
+
+
+  - name: data_cleanup
+    type: pipelines.data_cleanup_pipeline.DataCleanupPipeline
+    params:
+      # cleanup_steps is a list of preprocessors (built via PreprocessorFactory)
+      cleanup_steps:
+        - name: remove_duplicates
+          params:
+            field: "gameID"
+            keep: "first"
+            case_sensitive: false
+            dropna: true
+        - name: filter_rows
+          params:
+            field: "Genre"
+            values: [ "All" ]
+            operator: "equals"
+
 
   - name: filter_features
     type: pipelines.filter_pipeline.FilterPipeline
@@ -43,19 +62,20 @@ pipelines:
     type: pipelines.preprocessing_pipeline.PreprocessingPipeline
     params:
       text_field: "Description"
-#      preprocessors: []
+      #      preprocessors: []
       preprocessors:
 #        - name: filter_rows
 #          params:
 #            field: "Genre"
-#            values: ["All Genres"]
+#            values: ["All"]
 #            operator: "equals"
         - name: mask_genre_words
           params:
             description_field: "Description"
-            genre_words: ["RPG", "Comedy", "Adventure", "Horror", "Sci-Fi", "Fighting", "Military", "Naval", "Town", "City", "Town and City", "Building", "Build", "Builds", "Builder", "Builders", "Fight", "FPS"]
+            genre_words: [ "RPG", "Comedy", "Adventure", "Horror", "Sci-Fi", "Fighting", "Military", "Naval", "Town", "City", "Town and City", "Building", "Build", "Builds", "Builder", "Builders", "Fight", "FPS" ]
             mask_token: "<MASKED>"
             case_sensitive: false
+
 
   - name: split_data
     type: pipelines.data_splitter_pipeline.DataSplitterPipeline
@@ -73,18 +93,9 @@ pipelines:
       target_column: "Genre"
 
 
-
-#  - name: naive_bayes
-#    type: pipelines.experiment_pipeline.ExperimentPipeline
-#    params:
-#      experiment_type: "classification"
-#      model_name: "naive_bayes"
-#      evaluator_name: "classification"
-#      metrics: ["accuracy", "f1", "precision", "recall"]
-#      mlflow_experiment: "Naive Bayes Experiments"
-#      experiments:
-#        - params: {}  # default params
-
+    #------------------------------------------------------------
+    # Experiment Pipelines
+    #------------------------------------------------------------
   - name: naive_bayes
     type: pipelines.experiment_pipeline.ExperimentPipeline
     params:

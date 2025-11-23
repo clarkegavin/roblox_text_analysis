@@ -9,6 +9,7 @@ from .stopword_remover import StopwordRemover
 from .emoji_remover import EmojiRemover
 from .filter_rows import FilterRows
 from .mask_genre_words import MaskGenreWords
+from .remove_duplicates import RemoveDuplicates
 
 # Register built-in preprocessors
 PreprocessorFactory.register("stem", Stemmer)
@@ -25,5 +26,7 @@ PreprocessorFactory.register("filter_rows", FilterRows)
 PreprocessorFactory.register("filter", FilterRows)
 PreprocessorFactory.register("mask_genre_words", MaskGenreWords)
 PreprocessorFactory.register("mask_genre", MaskGenreWords)
+PreprocessorFactory.register("remove_duplicates", RemoveDuplicates)
+PreprocessorFactory.register("dedupe", RemoveDuplicates)
 
-__all__ = ["Preprocessor", "PreprocessorFactory", "Stemmer", "Lemmatizer", "Lowercase", "StopwordRemover", "EmojiRemover", "FilterRows", "MaskGenreWords"]
+__all__ = ["Preprocessor", "PreprocessorFactory", "Stemmer", "Lemmatizer", "Lowercase", "StopwordRemover", "EmojiRemover", "FilterRows", "MaskGenreWords", "RemoveDuplicates"]
