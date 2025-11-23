@@ -8,6 +8,7 @@ Base = declarative_base()
 class RobloxGame(Base):
     """ORM model mapping to dbo.roblox_games_data"""
     __tablename__ = "roblox_games_data"
+    #__tablename__ = "roblox_games"
     __table_args__ = {"schema": "dbo"}
 
     Id = Column("Id", BigInteger, primary_key=True, nullable=False)
