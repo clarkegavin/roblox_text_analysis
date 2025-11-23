@@ -8,6 +8,7 @@ from .lowercase import Lowercase
 from .stopword_remover import StopwordRemover
 from .emoji_remover import EmojiRemover
 from .filter_rows import FilterRows
+from .mask_genre_words import MaskGenreWords
 
 # Register built-in preprocessors
 PreprocessorFactory.register("stem", Stemmer)
@@ -22,5 +23,7 @@ PreprocessorFactory.register("emoji_remover", EmojiRemover)
 PreprocessorFactory.register("emoji", EmojiRemover)
 PreprocessorFactory.register("filter_rows", FilterRows)
 PreprocessorFactory.register("filter", FilterRows)
+PreprocessorFactory.register("mask_genre_words", MaskGenreWords)
+PreprocessorFactory.register("mask_genre", MaskGenreWords)
 
-__all__ = ["Preprocessor", "PreprocessorFactory", "Stemmer", "Lemmatizer", "Lowercase", "StopwordRemover", "EmojiRemover", "FilterRows"]
+__all__ = ["Preprocessor", "PreprocessorFactory", "Stemmer", "Lemmatizer", "Lowercase", "StopwordRemover", "EmojiRemover", "FilterRows", "MaskGenreWords"]

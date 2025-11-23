@@ -13,8 +13,8 @@ pipelines:
     extractor_type: roblox
     params:
       output_csv: "output/roblox_data.csv"
-      extractor_params:
-        sample_size: 1000
+#      extractor_params:
+#        sample_size: 1000
 
   - name: filter_features
     type: pipelines.filter_pipeline.FilterPipeline
@@ -34,6 +34,7 @@ pipelines:
         - name: class_balance
         - name: wordcloud_global
         - name: wordcloud_by_class
+        - name: duplicate_check
     #dataset:
       target: "Genre"
       text_field: "Description"
@@ -42,13 +43,19 @@ pipelines:
     type: pipelines.preprocessing_pipeline.PreprocessingPipeline
     params:
       text_field: "Description"
-      #preprocessors: []
+#      preprocessors: []
       preprocessors:
-        - name: filter_rows
+#        - name: filter_rows
+#          params:
+#            field: "Genre"
+#            values: ["All Genres"]
+#            operator: "equals"
+        - name: mask_genre_words
           params:
-            field: "Genre"
-            values: ["All Genres"]
-            operator: "equals"
+            description_field: "Description"
+            genre_words: ["RPG", "Comedy", "Adventure", "Horror", "Sci-Fi", "Fighting", "Military", "Naval", "Town", "City", "Town and City", "Building", "Build", "Builds", "Builder", "Builders", "Fight", "FPS"]
+            mask_token: "<MASKED>"
+            case_sensitive: false
 
   - name: split_data
     type: pipelines.data_splitter_pipeline.DataSplitterPipeline

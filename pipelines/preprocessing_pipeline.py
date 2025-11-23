@@ -39,6 +39,11 @@ class PreprocessingPipeline(Pipeline):
             texts = pre.fit_transform(texts)
 
         X = X.copy()
+        self.logger.info(f"Completed text preprocessing on field: {self.text_field}")
+        safe_texts = " | ".join(
+            t.encode("ascii", errors="ignore").decode() for t in texts[:20]
+        )
+        self.logger.info("Sample processed texts: %s", safe_texts)
         X[self.text_field] = texts
         return X
 

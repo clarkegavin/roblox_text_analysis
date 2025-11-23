@@ -45,7 +45,7 @@ class PipelineOrchestrator:
                     self.logger.info(f"Executing general pipeline: {pipeline.__class__.__name__} with data shape: {data.shape if data is not None else 'N/A'}")
                     result = pipeline.execute(data)
                     self.logger.info(f"Pipeline {pipeline.__class__.__name__} output shape: {result.shape if isinstance(result, pd.DataFrame) else 'N/A'}")
-
+                    self.logger.info(f"Result type: {type(result)}")
                 self.logger.info(f"Pipeline {pipeline.__class__.__name__} completed successfully")
                 return result
             except Exception as e:

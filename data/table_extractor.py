@@ -1,6 +1,6 @@
 # table_extractor.py
 from typing import List, Optional, Dict, Any, Type
-from sqlalchemy import select
+from sqlalchemy import select, func
 from .extractor import DataExtractor
 from .abstract_connector import DBConnector
 from sqlalchemy.orm import DeclarativeMeta
@@ -24,9 +24,12 @@ class TableDataExtractor(DataExtractor):
         self.logger.info(f"Fetching all rows from {self._model.__tablename__}")
         with self._connector.get_session() as session:
             stmt = select(self._model)
+            # SQL Server random ordering
+            stmt = stmt.order_by(func.newid())
+
             if self._sample_size:
                 stmt = stmt.limit(self._sample_size)
-                self.logger.info(f"Limiting to {self._sample_size} rows for sample")
+                self.logger.info(f"Randomly sampling {self._sample_size} rows for sample")
             rows = session.execute(stmt).scalars().all()
             return [r.to_dict() for r in rows]
 
