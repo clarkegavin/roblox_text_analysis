@@ -43,6 +43,9 @@ class FilterPipeline(Pipeline):
     @classmethod
     def from_config(cls, cfg: dict) -> "FilterPipeline":
         cls.logger.info(f"FilterPipeline cfg keys: {list(cfg.keys())}")
+        # params = cfg.get("params", cfg)
+        # filter_configs = params.get("filter_features", [])
+
         filter_configs = cfg.get("filter_features", [])
         return cls(filter_configs)
 
