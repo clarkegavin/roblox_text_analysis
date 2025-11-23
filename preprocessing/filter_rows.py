@@ -134,6 +134,7 @@ class FilterRows(Preprocessor):
         """
         self.logger.info("Applying FilterRows transformation")
 
+
         # pandas DataFrame optimisation
         if pd is not None and isinstance(X, pd.DataFrame):
             self.logger.info("Detected pandas.DataFrame input; applying vectorised filtering")
@@ -150,8 +151,25 @@ class FilterRows(Preprocessor):
             mask = None
 
             if self.operator == "equals":
-                values = [v if self.case_sensitive or not isinstance(v, str) else v.lower() for v in self.values]
-                mask = ser.isin(values)
+                # values = [v if self.case_sensitive or not isinstance(v, str) else v.lower() for v in self.values]
+                # mask = ser.isin(values)
+                # Normalise dataframe values
+                self.logger.info(f"Operator was 'equals'; normalising values for comparison")
+                ser_norm = ser.astype(str).str.strip()
+                if not self.case_sensitive:
+                    ser_norm = ser_norm.str.lower()
+
+                # Normalise filter values
+                values = [str(v).strip() for v in self.values]
+                if not self.case_sensitive:
+                    values = [v.lower() for v in values]
+
+                # Build mask
+                mask = ser_norm.isin(values)
+
+                # Debug info (optional but very useful)
+                self.logger.info(f"FilterRows - Normalised unique values sample: {ser_norm.unique()[:10]}")
+                self.logger.info(f"FilterRows - Looking for values: {values}")
             elif self.operator == "in":
                 values = [v if self.case_sensitive or not isinstance(v, str) else v.lower() for v in self.values]
                 mask = ser.isin(values)
