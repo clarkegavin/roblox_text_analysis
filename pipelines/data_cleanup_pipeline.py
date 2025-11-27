@@ -26,10 +26,22 @@ class DataCleanupPipeline(Pipeline):
         self.logger.info("Initializing DataCleanupPipeline")
         self.cleanup_steps = cleanup_steps or []
         # build preprocessor instances
-        self.steps = [
-            PreprocessorFactory.create(step["name"], **step.get("params", {}))
-            for step in self.cleanup_steps
-        ]
+        # self.steps = [
+        #     PreprocessorFactory.create(step["name"], **step.get("params", {}))
+        #     for step in self.cleanup_steps
+        # ]
+        self.steps = []
+
+        for step in self.cleanup_steps:
+            name = step["name"]
+            params = step.get("params") or {}
+
+            self.logger.info(f"Creating cleanup step '{name}' with params: {params}")
+
+            self.steps.append(
+                PreprocessorFactory.create(name, **params)
+            )
+
         self.logger.info(f"Initialized {len(self.steps)} cleanup steps")
         self.logger.info(f"Raw cleanup steps config: {self.cleanup_steps}")
 
@@ -59,7 +71,7 @@ class DataCleanupPipeline(Pipeline):
                     except Exception:
                         pass
             except Exception as e:
-                self.logger.exception(f"Cleanup step {step} failed: {e}")
+                self.logger.exception(f"Cleanup step {step.__class__.__name__} failed: {e}")
         self.logger.info(f"DataCleanupPipeline completed - data shape: {getattr(df, 'shape', 'unknown')}")
         return df
 

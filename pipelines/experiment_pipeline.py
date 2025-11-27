@@ -139,6 +139,7 @@ class ExperimentPipeline(Pipeline):
             steps = [PreprocessorFactory.create(pre["name"], **pre.get("params", {}))
                      for pre in exp_pre_cfgs]
 
+            self.logger.info(f"Applying per-experiment preprocessing steps: {steps}")
             preprocessor = SequentialPreprocessor(steps)
             text_field = exp_cfg.get("text_field")
 

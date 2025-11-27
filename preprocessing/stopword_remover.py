@@ -38,22 +38,21 @@ class StopwordRemover(Preprocessor):
     """
 
     DEFAULT_STOPWORDS: Set[str] = {
-        "the",
-        "and",
-        "is",
-        "in",
-        "it",
-        "of",
-        "to",
-        "a",
-        "for",
-        "on",
-        "with",
-        "that",
-        "this",
-        "as",
-        "are",
-        "was",
+        "the", "and", "is", "in", "it", "of", "to", "a", "for", "on", "with", "that", "this",
+        "as", "are", "was", "at", "by", "an", "be", "from", "or", "not", "but", "all",
+        "if", "they", "you", "he", "she", "we", "his", "her", "its", "my", "your", "their",
+        "what", "which", "when", "where", "who", "how", "there", "so", "no", "yes", "do",
+        "does", "did", "have", "has", "had", "will", "would", "can", "could", "should",
+        "i", "me", "us", "them", "our", "yours", "theirs"
+    }
+
+    ROBLOX_STOPWORDS: Set[str] = {
+        "game", "play", "playing", "plays", "fun", "awesome", "cool", "best", "epic",
+        "new", "update", "updates", "updated", "soon",
+        "like", "likes", "favorite", "favorites", "fav",
+        "follow", "join", "visit", "check", "share",
+        "welcome", "enjoy", "thanks", "thank",
+        "please", "plz", "pls"
     }
 
     def __init__(self, language: str = "english", stopwords: Optional[Iterable[str]] = None, lower: bool = True):
@@ -69,12 +68,16 @@ class StopwordRemover(Preprocessor):
                 self.logger.info("Using explicit stopword list provided in params")
             except Exception:
                 self.logger.warning("Provided stopwords not iterable; falling back to defaults")
-                self.stopwords = set(self.DEFAULT_STOPWORDS)
+                #self.stopwords = set(self.DEFAULT_STOPWORDS)
+                self.stopwords = set(self.DEFAULT_STOPWORDS).union(self.ROBLOX_STOPWORDS)
         else:
             # try to load from nltk if available
             if _nltk_stopwords is not None:
                 try:
-                    self.stopwords = set(_nltk_stopwords.words(self.language))
+                    #self.stopwords = set(_nltk_stopwords.words(self.language))
+                    base_sw = set(_nltk_stopwords.words(self.language))
+                    self.stopwords = base_sw.union(self.ROBLOX_STOPWORDS)
+
                     self.logger.info(f"Loaded {len(self.stopwords)} stopwords for language '{self.language}' from NLTK")
                 except Exception:
                     self.logger.warning(f"NLTK stopwords for '{self.language}' not available; using default set")
