@@ -10,6 +10,10 @@ from .emoji_remover import EmojiRemover
 from .filter_rows import FilterRows
 from .mask_genre_words import MaskGenreWords
 from .remove_duplicates import RemoveDuplicates
+from .remove_urls import RemoveURLs
+from .remove_repeated_characters import RemoveRepeatedCharacters
+from .remove_punctuation_noise import RemovePunctuationNoise
+from .remove_whitespace import RemoveWhitespace
 
 # Register built-in preprocessors
 PreprocessorFactory.register("stem", Stemmer)
@@ -28,5 +32,13 @@ PreprocessorFactory.register("mask_genre_words", MaskGenreWords)
 PreprocessorFactory.register("mask_genre", MaskGenreWords)
 PreprocessorFactory.register("remove_duplicates", RemoveDuplicates)
 PreprocessorFactory.register("dedupe", RemoveDuplicates)
+PreprocessorFactory.register("remove_urls", RemoveURLs)
+PreprocessorFactory.register("removeurls", RemoveURLs)
+PreprocessorFactory.register("remove_repeated_characters", RemoveRepeatedCharacters)
+PreprocessorFactory.register("remove_repeated", RemoveRepeatedCharacters)
+PreprocessorFactory.register("remove_punctuation_noise", RemovePunctuationNoise)
+PreprocessorFactory.register("punctuation_noise", RemovePunctuationNoise)
+PreprocessorFactory.register("remove_whitespace", RemoveWhitespace)
+PreprocessorFactory.register("whitespace", RemoveWhitespace)
 
-__all__ = ["Preprocessor", "PreprocessorFactory", "Stemmer", "Lemmatizer", "Lowercase", "StopwordRemover", "EmojiRemover", "FilterRows", "MaskGenreWords", "RemoveDuplicates"]
+__all__ = ["Preprocessor", "PreprocessorFactory", "Stemmer", "Lemmatizer", "Lowercase", "StopwordRemover", "EmojiRemover", "FilterRows", "MaskGenreWords", "RemoveDuplicates", "RemoveURLs", "RemoveRepeatedCharacters", "RemovePunctuationNoise", "RemoveWhitespace"]

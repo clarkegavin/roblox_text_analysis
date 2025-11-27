@@ -94,51 +94,17 @@ class ClassificationExperiment(Experiment):
 
                # --- 1. Vectorizer support -----------------------
 
-
-        if self.vectorizer_name:
-            self.logger.info(f"Using vectorizer '{self.vectorizer_name}' on field '{self.vectorizer_field}'")
-            self.vectorizer_params['column'] = self.vectorizer_field
-            vectorizer = VectorizerFactory.get_vectorizer(
-                self.vectorizer_name,
-                **self.vectorizer_params
-            )
-            X_train = vectorizer.fit_transform(X_train.fillna("")) # Fit on training set
-            X_test = vectorizer.transform(X_test.fillna("")) # Transform on test set
-
-
         with mlflow.start_run(run_name=self.name):
-            # mlflow.log_param("model", self.model_name)
-            # mlflow.log_param("evaluator", self.evaluator_name)
-            # mlflow.log_param("description", self.description)
-            # mlflow.log_params(self.model_params)
-            # mlflow log vectorizer params
-            # if self.vectorizer_name:
-            #     mlflow.log_param("vectorizer_name", self.vectorizer_name)
-            #     mlflow.log_param("vectorizer_field", self.vectorizer_field)
-            #     for k, v in self.vectorizer_params.items():
-            #         mlflow.log_param(f"vectorizer_{k}", v)
-            #
-            # if self.preprocessing_metadata:
-            #     #mlflow.log_param("preprocessing_metadata", json.dumps(self.preprocessing_metadata))
-            #     self.logger.info(f"Logging preprocessing metadata: {self.preprocessing_metadata}")
-            #     for step in self.preprocessing_metadata:
-            #         name = step["name"]
-            #         params = step["params"]
-            #         for k, v in params.items():
-            #             mlflow.log_param(f"pre_{name}_{k}", v)
-            #
-            # # --- 2. Cross-validation support -----------------------
-            # mlflow.log_param("cv_enabled", self.cv_enabled)
-            # mlflow.log_param("cv_folds", self.cv_folds)
-            # mlflow.log_param("cv_stratified", self.cv_stratified)
+            if self.vectorizer_name:
+                self.logger.info(f"Using vectorizer '{self.vectorizer_name}' on field '{self.vectorizer_field}'")
+                self.vectorizer_params['column'] = self.vectorizer_field
+                vectorizer = VectorizerFactory.get_vectorizer(
+                    self.vectorizer_name,
+                    **self.vectorizer_params
+                )
+                X_train = vectorizer.fit_transform(X_train.fillna(""))  # Fit on training set
+                X_test = vectorizer.transform(X_test.fillna(""))  # Transform on test set
 
-            # preprocessing support
-            # preprocessing_params = self.extra_params
-            # if hasattr(self.extra_params.get("preprocessing", {}), "get_params"):
-            #     self.logger.info("Logging preprocessing parameters to MLflow")
-            #     preprocessing_params = self.extra_params["preprocessing"].get_params()
-            #     for k, v in preprocessing_params.items():
-            #         mlflow.log_param(f"preprocessing_{k}", v)
             self._log_mlflow_params()
 
             if self.cv_enabled:
@@ -301,7 +267,7 @@ class ClassificationExperiment(Experiment):
             except Exception as e:
                 self.logger.warning(f"Could not create visualisation '{viz_name}': {e}")
 
-    def _log_mlflow_params(self):
+    def     _log_mlflow_params(self):
         """Log all parameters and preprocessing metadata to MLflow."""
         # --- Basic experiment info ---
         mlflow.log_param("model", self.model_name)
