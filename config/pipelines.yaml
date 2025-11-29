@@ -16,6 +16,7 @@ pipelines:
 #      extractor_params:
 #        sample_size: 1000
 
+
 # anything that changes the shape of teh data will need to be in this cleanup block
   - name: data_cleanup
     type: pipelines.data_cleanup_pipeline.DataCleanupPipeline
@@ -28,12 +29,12 @@ pipelines:
             keep: "first"
             case_sensitive: false
             dropna: true
-        - name: filter_rows
-          params:
-            field: "Genre"
-            values: [ "All" ]
-            operator: "equals"
-            case_sensitive: false
+#        - name: filter_rows
+#          params:
+#            field: "Genre"
+#            values: [ "All" ]
+#            operator: "equals"
+#            case_sensitive: false
         - name: filter_rows
           params:
             field: "Description"
@@ -84,6 +85,45 @@ pipelines:
     #dataset:
       target: "Genre"
       text_field: "Description"
+
+#------------------------------------------------------------
+# Clustering
+#------------------------------------------------------------
+  - name: clustering
+    type: pipelines.clustering_pipeline.ClusteringPipeline
+    params:
+      text_field: "Description"
+      genre_field: "Genre"
+      filter_genre: "All"
+      vectorizer:
+        vectorizer_name: "tfidf"
+        vectorizer_field: "Description"
+        vectorizer_params:
+          max_features: 5000
+          ngram_range: [ 1, 2 ]
+          stop_words: "english"
+      clusterer:
+         name: "hdbscan"
+         params:
+            min_cluster_size: 30
+            min_samples: 10
+            #metric: "cosine" # memory issues with cosine on large datasets
+            metric: "euclidean"
+      reducer:
+         name: "umap"
+         params:
+            n_components: 50
+      visualisations:
+         name: cluster_plot
+         params:
+            output_dir: "output/clustering"
+            figsize: [10, 8]
+            xlabel: "UMAP Dimension 1"
+            ylabel: "UMAP Dimension 2"
+            title: "HDBSCAN Clustering of Roblox Game Descriptions"
+            xticks_rotation: 45
+
+
 
   - name: preprocess_text
     type: pipelines.preprocessing_pipeline.PreprocessingPipeline
