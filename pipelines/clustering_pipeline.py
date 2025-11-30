@@ -1,9 +1,10 @@
 #pipelines/clustering_pipeline.py
 import numpy as np
-
+import os
 from visualisations import VisualisationFactory
 from .base import Pipeline
 from logs.logger import get_logger
+from collections import Counter
 
 #from vectorizers.tfidf_vectorizer import TfidfTextVectorizer
 #from clusterers.hdbscan_clusterer import HDBSCANClusterer
@@ -50,6 +51,7 @@ class ClusteringPipeline(Pipeline):
         visualisations_cfg = params.get("visualisations", {})
         visualisations_name = visualisations_cfg.get("name")
         visualisations_params = visualisations_cfg.get("params", {})
+        self.dimensions = visualisations_params.get("dimensions", 2)
         self.plotter = VisualisationFactory.get_visualisation(visualisations_name, **visualisations_params)
 
     def execute(self, df):
@@ -78,7 +80,8 @@ class ClusteringPipeline(Pipeline):
 
         # Reduce (for visualisation)
         self.logger.info(f"Reducing dimensions using {self.reducer.name}")
-        self.reducer.set_components(3)
+        dimensions = self.dimensions
+        self.reducer.set_components(dimensions)
         X_reduced = self.reducer.fit_transform(X_reduced)
         self.logger.info(f"Reduced shape: {X_reduced.shape}")
 
@@ -86,7 +89,8 @@ class ClusteringPipeline(Pipeline):
         self.logger.info(f"Plotting clusters using {self.plotter.name}")
         fig, ax, scatter = self.plotter.plot(X_reduced, labels)
         self.logger.info("Cluster plot generated")
-        self.plotter.save(fig, "clustering_pipeline_cluster_plot.png")
+        plot_path = os.path.join(self.plotter.output_dir, "clustering_pipeline_cluster_plot.png")
+        self.plotter.save(fig, plot_path)
         self.plotter.save_embeddings(X_reduced, labels, df_filtered, prefix="clustering_pipeline")
         self.logger.info("Cluster plot saved as 'clustering_pipeline_cluster_plot.png'")
 
@@ -98,8 +102,12 @@ class ClusteringPipeline(Pipeline):
         # Optional: extract cluster keywords
         cluster_keywords = self._extract_cluster_keywords(X, labels)
         # Log cluster keywords
+        label_counts = Counter(labels)
         for cluster_id, keywords in cluster_keywords.items():
-            self.logger.info(f"Cluster {cluster_id} keywords: {keywords}")
+            size = label_counts.get(cluster_id, 0)
+            self.logger.info(
+                f"Cluster {cluster_id} (size={size}) keywords: {keywords}"
+            )
 
         # save cluster keywords to file
         self._save_cluster_keywords(cluster_keywords, "output/clustering_pipeline_cluster_keywords.txt")
@@ -110,7 +118,7 @@ class ClusteringPipeline(Pipeline):
     def _save_cluster_keywords(self, cluster_keywords, filepath):
         try:
             self.logger.info(f"Saving cluster keywords to {filepath}")
-            with open(filepath, "w") as f:
+            with open(filepath, "w", encoding = "utf-8", errors="replace") as f:
                 for cluster_id, keywords in cluster_keywords.items():
                     f.write(f"Cluster {cluster_id} keywords: {', '.join(keywords)}\n")
             self.logger.info(f"Cluster keywords saved to {filepath}")
